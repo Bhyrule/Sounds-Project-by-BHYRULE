@@ -115,6 +115,13 @@ body {
   padding: 20px 0;
   text-align: left;
   overflow-y: auto;
+  /* Masquer la barre de défilement (scrollbar) tout en permettant le scroll */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE et Edge */
+}
+
+.lyrics-container::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
 
 .lyric-line {
@@ -175,6 +182,13 @@ body {
   flex-direction: column;
   gap: 32px;
   padding: 40px;
+  /* Masquer la barre de défilement (scrollbar) tout en permettant le scroll */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE et Edge */
+}
+
+.fullscreen-lyrics-content::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
 
 .fullscreen-lyrics-content .lyric-line {
