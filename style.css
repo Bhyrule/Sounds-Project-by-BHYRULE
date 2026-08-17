@@ -11,7 +11,6 @@
   --radius-main: 12px;
 }
 
-/* THÈMES SPICETIFY */
 body.theme-neon {
   --spotify-green: #00f3ff;
   --accent-color: #00f3ff;
@@ -56,7 +55,6 @@ body {
   grid-template-columns: 300px 1fr 0px;
 }
 
-/* EFFET TRANSPARENT MODERN (GLASSMORPHISM) */
 .card {
   background: var(--glass-bg);
   backdrop-filter: blur(20px);
@@ -68,8 +66,8 @@ body {
 /* SIDEBAR */
 .sidebar { grid-area: sidebar; display: flex; flex-direction: column; gap: 8px; }
 .nav-menu { padding: 20px 24px; }
-.logo-container { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; }
-.logo-text { font-size: 18px; font-weight: 700; }
+.logo-container { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+.logo-text { font-size: 20px; font-weight: 800; letter-spacing: 0.5px; }
 .nav-menu ul { list-style: none; }
 .nav-menu li { display: flex; align-items: center; gap: 20px; height: 40px; color: var(--text-gray); font-weight: 700; font-size: 14px; cursor: pointer; }
 .nav-menu li:hover, .nav-menu li.active { color: var(--text-white); }
@@ -105,7 +103,7 @@ body {
 .play-hover-btn { position: absolute; right: 24px; bottom: 80px; width: 48px; height: 48px; border-radius: 50%; background-color: var(--accent-color); display: flex; align-items: center; justify-content: center; opacity: 0; transform: translateY(8px); transition: 0.3s; box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
 .spotify-card:hover .play-hover-btn { opacity: 1; transform: translateY(0); }
 
-/* PANNEAU DROIT & MODE PAROLES LUMINEUSES (STYLE TIKTOK / INSTA) */
+/* VOLET DROIT & PAROLES */
 .right-panel { grid-area: rightpanel; display: flex; flex-direction: column; padding: 16px; overflow: hidden; }
 .spotify-app.panel-closed .right-panel { display: none; }
 .right-panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
@@ -116,23 +114,76 @@ body {
   gap: 20px;
   padding: 20px 0;
   text-align: left;
+  overflow-y: auto;
 }
 
 .lyric-line {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 800;
   color: rgba(255, 255, 255, 0.25);
   transition: all 0.4s ease;
   cursor: pointer;
-  filter: blur(1px);
+  filter: blur(0.5px);
 }
 
 .lyric-line.active {
   color: #ffffff;
-  font-size: 26px;
+  font-size: 24px;
   filter: blur(0px);
   text-shadow: 0 0 15px var(--accent-color), 0 0 30px var(--accent-color);
-  transform: scale(1.03);
+  transform: scale(1.02);
+}
+
+/* OVERLAY PLEIN ÉCRAN PAROLES (KARAOKÉ TIKTOK) */
+.fullscreen-lyrics-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: radial-gradient(circle at center, rgba(43, 16, 85, 0.95), rgba(0, 0, 0, 0.98));
+  backdrop-filter: blur(30px);
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+}
+
+.close-fullscreen-btn {
+  position: absolute;
+  top: 30px;
+  right: 30px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--glass-border);
+  color: white;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fullscreen-lyrics-content {
+  max-width: 800px;
+  max-height: 80vh;
+  overflow-y: auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding: 40px;
+}
+
+.fullscreen-lyrics-content .lyric-line {
+  font-size: 28px;
+}
+
+.fullscreen-lyrics-content .lyric-line.active {
+  font-size: 42px;
+  text-shadow: 0 0 20px var(--accent-color), 0 0 40px var(--accent-color);
 }
 
 /* PLAYER */
