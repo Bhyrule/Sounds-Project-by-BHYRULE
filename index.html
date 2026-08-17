@@ -3,16 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Spotify - Lecteur Web</title>
+  <title>Spotify - Modern Glass</title>
   <link rel="stylesheet" href="style.css">
-  <link rel="icon" href="https://open.spotifycdn.com/cdn/images/favicon32.b64411e3.png">
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
 
   <div class="spotify-app" id="app-container">
     
-    <!-- PANNEAU LATÉRAL (SIDEBAR) -->
+    <!-- SIDEBAR -->
     <aside class="sidebar">
       <nav class="card nav-menu">
         <div class="logo-container">
@@ -20,136 +19,85 @@
           <span class="logo-text">Spotify</span>
         </div>
         <ul>
-          <li class="active" id="btn-home">
-            <i data-lucide="home"></i>
-            <span>Accueil</span>
-          </li>
-          <li id="btn-search-nav">
-            <i data-lucide="search"></i>
-            <span>Rechercher</span>
-          </li>
+          <li class="active" id="btn-home"><i data-lucide="home"></i><span>Accueil</span></li>
+          <li id="btn-search-nav"><i data-lucide="search"></i><span>Rechercher</span></li>
         </ul>
       </nav>
 
       <div class="card library-menu">
         <div class="library-header">
-          <button class="lib-title-btn">
-            <i data-lucide="library"></i>
-            <span>Bibliothèque</span>
-          </button>
-          <div class="lib-actions">
-            <button title="Créer une playlist"><i data-lucide="plus"></i></button>
-          </div>
-        </div>
-
-        <div class="pills-container">
-          <button class="pill active">Playlists</button>
-          <button class="pill">Artistes</button>
-        </div>
-
-        <div class="library-items" id="library-items">
-          <!-- Généré par JS -->
+          <button class="lib-title-btn"><i data-lucide="library"></i><span>Bibliothèque</span></button>
         </div>
       </div>
     </aside>
 
     <!-- ZONE PRINCIPALE -->
-    <main class="main-view">
+    <main class="card main-view">
       <header class="top-header">
         <div class="header-nav">
           <button class="circle-btn"><i data-lucide="chevron-left"></i></button>
           <button class="circle-btn"><i data-lucide="chevron-right"></i></button>
           
-          <div class="header-search-bar hidden" id="header-search">
+          <div class="header-search-bar" id="header-search">
             <i data-lucide="search" class="search-icon"></i>
-            <input type="text" placeholder="Que souhaitez-vous écouter ?" id="search-input">
+            <input type="text" placeholder="Rechercher un titre..." id="search-input">
           </div>
         </div>
 
         <div class="header-user">
-          <button class="badge-btn glow">Explorer Premium</button>
+          <!-- SÉLECTEUR DE THÈME -->
+          <select class="theme-select" id="theme-select" onchange="changeTheme(this.value)">
+            <option value="default">Thème Original</option>
+            <option value="neon">Thème Néon Cyber</option>
+            <option value="dracula">Thème Dracula</option>
+          </select>
           <button class="circle-btn"><i data-lucide="bell"></i></button>
-          <button class="profile-avatar">S</button>
+          <button class="profile-avatar circle-btn">S</button>
         </div>
       </header>
 
-      <div class="content-view" id="content-view">
-        <!-- Contenu dynamique -->
-      </div>
+      <div class="content-view" id="content-view"></div>
     </main>
 
-    <!-- OPTION A : VOLET LATÉRAL DROIT (EN COURS DE LECTURE / PAROLES) -->
+    <!-- VOLET DROIT - PAROLES LUMINEUSES INSTA/TIKTOK -->
     <aside class="card right-panel" id="right-panel">
       <div class="right-panel-header">
-        <span class="right-panel-title" id="panel-header-title">En cours de lecture</span>
-        <button class="icon-btn-small" onclick="toggleRightPanel()"><i data-lucide="x"></i></button>
+        <span class="right-panel-title">Paroles en direct</span>
+        <button class="circle-btn" onclick="toggleRightPanel()"><i data-lucide="x"></i></button>
       </div>
 
-      <div class="panel-tab-buttons">
-        <button class="tab-btn active" id="tab-info-btn" onclick="switchRightTab('info')">Infos</button>
-        <button class="tab-btn" id="tab-lyrics-btn" onclick="switchRightTab('lyrics')">Paroles</button>
-      </div>
-
-      <!-- ONGLET INFOS -->
-      <div class="right-panel-content" id="panel-tab-info">
-        <div class="cover-container">
-          <img src="" id="panel-cover" alt="Album Cover">
-        </div>
-        <div class="panel-song-details">
-          <h3 id="panel-song-title">Titre</h3>
-          <p id="panel-song-artist">Artiste</p>
-        </div>
-        <div class="artist-card">
-          <h4>À propos de l'artiste</h4>
-          <p id="panel-artist-bio">Informations sur l'artiste...</p>
-        </div>
-      </div>
-
-      <!-- ONGLET PAROLES -->
-      <div class="right-panel-content hidden" id="panel-tab-lyrics">
-        <div class="lyrics-box" id="lyrics-content">
-          <!-- Injecté par JS -->
-        </div>
+      <div class="lyrics-container" id="lyrics-box">
+        <!-- Généré dynamiquement en JS -->
       </div>
     </aside>
 
-    <!-- LECTEUR DU BAS -->
-    <footer class="player-bar">
+    <!-- PLAYER DU BAS -->
+    <footer class="card player-bar">
       <div class="player-left">
-        <img src="" alt="Cover" id="player-img">
+        <img src="" id="player-img" alt="Cover">
         <div class="song-meta">
           <span class="song-name" id="player-title">-</span>
           <span class="song-artist" id="player-artist">-</span>
         </div>
-        <button class="like-btn"><i data-lucide="heart"></i></button>
+        <!-- BOUTON DE TÉLÉCHARGEMENT -->
+        <button class="download-btn" title="Télécharger la musique" onclick="downloadCurrentSong()"><i data-lucide="download"></i></button>
       </div>
 
       <div class="player-center">
         <div class="controls">
-          <button title="Aléatoire"><i data-lucide="shuffle"></i></button>
-          <button title="Précédent" onclick="prevSong()"><i data-lucide="skip-back"></i></button>
+          <button onclick="prevSong()"><i data-lucide="skip-back"></i></button>
           <button class="play-circle" id="master-play" onclick="togglePlay()"><i data-lucide="play"></i></button>
-          <button title="Suivant" onclick="nextSong()"><i data-lucide="skip-forward"></i></button>
-          <button title="Répéter"><i data-lucide="repeat"></i></button>
+          <button onclick="nextSong()"><i data-lucide="skip-forward"></i></button>
         </div>
         <div class="progress-container">
           <span class="time-label" id="current-time">0:00</span>
-          <div class="bar-bg">
-            <div class="bar-fill" id="progress-fill"></div>
-          </div>
+          <div class="bar-bg"><div class="bar-fill" id="progress-fill"></div></div>
           <span class="time-label" id="total-time">0:00</span>
         </div>
       </div>
 
       <div class="player-right">
-        <button title="Paroles / Infos" id="btn-toggle-panel" onclick="toggleRightPanel()"><i data-lucide="mic-2"></i></button>
-        <button title="File d'attente"><i data-lucide="list-music"></i></button>
-        <div class="volume-container">
-          <button><i data-lucide="volume-2"></i></button>
-          <div class="bar-bg">
-            <div class="bar-fill" style="width: 80%;"></div>
-          </div>
-        </div>
+        <button title="Paroles synchro" onclick="toggleRightPanel()"><i data-lucide="mic-2"></i></button>
       </div>
     </footer>
 

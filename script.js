@@ -5,31 +5,34 @@ let isPlaying = false;
 let currentSongIndex = 0;
 let progressTimer;
 
-// Base de données avec Paroles et Bios
+// Base de données avec horodatage des paroles (Synchro Karaoké)
 const database = [
   { 
     id: 'fJ9rUzIMcZQ', 
     title: 'Bohemian Rhapsody', 
     artist: 'Queen', 
     cover: 'https://i.scdn.co/image/ab67616d0000b273ce40b521ea80f6f0f58022d2',
-    bio: 'Queen est un groupe de rock britannique formé en 1970 à Londres par Freddie Mercury, Brian May et Roger Taylor.',
-    lyrics: `Is this the real life?\nIs this just fantasy?\nCaught in a landslide,\nNo escape from reality...\n\nOpen your eyes,\nLook up to the skies and see...`
+    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+    timedLyrics: [
+      { time: 0, text: "Is this the real life?" },
+      { time: 4, text: "Is this just fantasy?" },
+      { time: 8, text: "Caught in a landslide," },
+      { time: 12, text: "No escape from reality..." },
+      { time: 16, text: "Open your eyes, look up to the skies and see..." }
+    ]
   },
   { 
     id: '3JZ_D3ELwOQ', 
     title: 'Midnight City', 
     artist: 'M83', 
     cover: 'https://i.scdn.co/image/ab67616d0000b2735252bd33e144a44b82d02c01',
-    bio: 'M83 est un groupe français de musique électronique formé en 1999 par Anthony Gonzalez.',
-    lyrics: `Waiting in a car\nWaiting for a ride in the dark\nThe night city grows\nLook and see her eyes, they glow...`
-  },
-  { 
-    id: 'dQw4w9WgXcQ', 
-    title: 'Never Gonna Give You Up', 
-    artist: 'Rick Astley', 
-    cover: 'https://i.scdn.co/image/ab67616d0000b273ba0be73c727db43b8110e0e1',
-    bio: 'Rick Astley est un chanteur pop britannique devenu célèbre à la fin des années 1980.',
-    lyrics: `We're no strangers to love\nYou know the rules and so do I\nA full commitment's what I'm thinking of\nYou wouldn't get this from any other guy...`
+    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
+    timedLyrics: [
+      { time: 0, text: "Waiting in a car..." },
+      { time: 5, text: "Waiting for a ride in the dark." },
+      { time: 10, text: "The night city grows," },
+      { time: 15, text: "Look and see her eyes, they glow..." }
+    ]
   }
 ];
 
@@ -41,60 +44,39 @@ function onYouTubeIframeAPIReady() {
   });
 }
 
-// CORRECTION RECHERCHE INSTANTANÉE
-document.getElementById('search-input').addEventListener('input', (e) => {
-  const query = e.target.value.toLowerCase().trim();
-  const view = document.getElementById('content-view');
-
-  if (query === '') {
-    renderHomePage();
-    return;
+// CHANGER LE THÈME (SPICETIFY)
+function changeTheme(themeName) {
+  document.body.className = '';
+  if (themeName !== 'default') {
+    document.body.classList.add(`theme-${themeName}`);
   }
+}
 
-  const results = database.filter(s => 
-    s.title.toLowerCase().includes(query) || 
-    s.artist.toLowerCase().includes(query)
-  );
+// TÉLÉCHARGER LA MUSIQUE
+function downloadCurrentSong() {
+  const song = database[currentSongIndex];
+  const a = document.createElement('a');
+  a.href = song.audioUrl;
+  a.download = `${song.artist} - ${song.title}.mp3`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
 
-  if (results.length === 0) {
-    view.innerHTML = `<h2 class="section-title">Aucun résultat trouvé pour "${query}"</h2>`;
-    return;
-  }
-
-  view.innerHTML = `
-    <h2 class="section-title">Résultats pour "${query}"</h2>
-    <div class="grid-cards">
-      ${results.map((song) => `
-        <div class="spotify-card" onclick="playSongById('${song.id}')">
-          <img src="${song.cover}" alt="Cover">
-          <div class="card-title">${song.title}</div>
-          <div class="card-desc">${song.artist}</div>
-          <div class="play-hover-btn">
-            <i data-lucide="play" style="fill: black; color: black; margin-left: 2px;"></i>
-          </div>
-        </div>
-      `).join('')}
-    </div>
-  `;
-  lucide.createIcons();
-});
-
-// GESTION DU LECTEUR ET DU VOLET DROIT (OPTION A)
+// CHARGER UNE MUSIQUE
 function loadSong(index) {
   currentSongIndex = index;
   const song = database[index];
 
-  // Màj Lecteur Bas
   document.getElementById('player-title').textContent = song.title;
   document.getElementById('player-artist').textContent = song.artist;
   document.getElementById('player-img').src = song.cover;
 
-  // Màj Volet Droit
-  document.getElementById('panel-cover').src = song.cover;
-  document.getElementById('panel-song-title').textContent = song.title;
-  document.getElementById('panel-song-artist').textContent = song.artist;
-  document.getElementById('panel-artist-bio').textContent = song.bio;
-  document.getElementById('lyrics-content').textContent = song.lyrics;
+  // Génération des paroles lumineuses
+  const lyricsBox = document.getElementById('lyrics-box');
+  lyricsBox.innerHTML = song.timedLyrics.map((l, i) => `
+    <div class="lyric-line ${i === 0 ? 'active' : ''}" id="lyric-${i}">${l.text}</div>
+  `).join('');
 
   if (player && player.loadVideoById) {
     player.loadVideoById(song.id);
@@ -103,9 +85,35 @@ function loadSong(index) {
   }
 }
 
-function playSongById(id) {
-  const index = database.findIndex(s => s.id === id);
-  if (index !== -1) loadSong(index);
+// DÉTECTION EN TEMPS RÉEL DU TEMPS POUR LES PAROLES LUMINEUSES
+function syncLyrics(currentTime) {
+  const song = database[currentSongIndex];
+  song.timedLyrics.forEach((line, index) => {
+    const el = document.getElementById(`lyric-${index}`);
+    if (!el) return;
+
+    const nextLine = song.timedLyrics[index + 1];
+    if (currentTime >= line.time && (!nextLine || currentTime < nextLine.time)) {
+      document.querySelectorAll('.lyric-line').forEach(l => l.classList.remove('active'));
+      el.classList.add('active');
+    }
+  });
+}
+
+function startTimer() {
+  clearInterval(progressTimer);
+  progressTimer = setInterval(() => {
+    if (player && player.getCurrentTime) {
+      const cur = player.getCurrentTime();
+      const tot = player.getDuration();
+      if (tot > 0) {
+        document.getElementById('progress-fill').style.width = `${(cur / tot) * 100}%`;
+        document.getElementById('current-time').textContent = formatTime(cur);
+        document.getElementById('total-time').textContent = formatTime(tot);
+        syncLyrics(cur);
+      }
+    }
+  }, 500);
 }
 
 function togglePlay() {
@@ -122,21 +130,6 @@ function updatePlayBtn() {
   lucide.createIcons();
   if (isPlaying) startTimer();
   else clearInterval(progressTimer);
-}
-
-function startTimer() {
-  clearInterval(progressTimer);
-  progressTimer = setInterval(() => {
-    if (player && player.getCurrentTime) {
-      const cur = player.getCurrentTime();
-      const tot = player.getDuration();
-      if (tot > 0) {
-        document.getElementById('progress-fill').style.width = `${(cur / tot) * 100}%`;
-        document.getElementById('current-time').textContent = formatTime(cur);
-        document.getElementById('total-time').textContent = formatTime(tot);
-      }
-    }
-  }, 1000);
 }
 
 function formatTime(sec) {
@@ -159,31 +152,41 @@ function onStateChange(e) {
   if (e.data === YT.PlayerState.ENDED) nextSong();
 }
 
-// TOGGLE VOLET LATÉRAL & ONGLETS
 function toggleRightPanel() {
   document.getElementById('app-container').classList.toggle('panel-closed');
 }
 
-function switchRightTab(tab) {
-  const infoTab = document.getElementById('panel-tab-info');
-  const lyricsTab = document.getElementById('panel-tab-lyrics');
-  const infoBtn = document.getElementById('tab-info-btn');
-  const lyricsBtn = document.getElementById('tab-lyrics-btn');
+// RECHERCHE DYNAMIQUE
+document.getElementById('search-input').addEventListener('input', (e) => {
+  const query = e.target.value.toLowerCase().trim();
+  const view = document.getElementById('content-view');
 
-  if (tab === 'info') {
-    infoTab.classList.remove('hidden');
-    lyricsTab.classList.add('hidden');
-    infoBtn.classList.add('active');
-    lyricsBtn.classList.remove('active');
-  } else {
-    lyricsTab.classList.remove('hidden');
-    infoTab.classList.add('hidden');
-    lyricsBtn.classList.add('active');
-    infoBtn.classList.remove('active');
+  if (query === '') {
+    renderHomePage();
+    return;
   }
-}
 
-// VUES PRINCIPALES
+  const results = database.filter(s => 
+    s.title.toLowerCase().includes(query) || 
+    s.artist.toLowerCase().includes(query)
+  );
+
+  view.innerHTML = `
+    <h2 class="section-title">Résultats pour "${query}"</h2>
+    <div class="grid-cards">
+      ${results.map((song) => `
+        <div class="spotify-card" onclick="loadSong(${database.indexOf(song)})">
+          <img src="${song.cover}" alt="Cover">
+          <div class="card-title">${song.title}</div>
+          <div class="card-desc">${song.artist}</div>
+          <div class="play-hover-btn"><i data-lucide="play" style="fill: black; color: black;"></i></div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+  lucide.createIcons();
+});
+
 function renderHomePage() {
   const view = document.getElementById('content-view');
   view.innerHTML = `
@@ -194,9 +197,7 @@ function renderHomePage() {
           <img src="${song.cover}" alt="Cover">
           <div class="card-title">${song.title}</div>
           <div class="card-desc">${song.artist}</div>
-          <div class="play-hover-btn">
-            <i data-lucide="play" style="fill: black; color: black; margin-left: 2px;"></i>
-          </div>
+          <div class="play-hover-btn"><i data-lucide="play" style="fill: black; color: black;"></i></div>
         </div>
       `).join('')}
     </div>
@@ -204,15 +205,5 @@ function renderHomePage() {
   lucide.createIcons();
 }
 
-document.getElementById('btn-home').addEventListener('click', () => {
-  document.getElementById('header-search').classList.add('hidden');
-  renderHomePage();
-});
-
-document.getElementById('btn-search-nav').addEventListener('click', () => {
-  document.getElementById('header-search').classList.remove('hidden');
-});
-
-// Initialisation
 renderHomePage();
 loadSong(0);
